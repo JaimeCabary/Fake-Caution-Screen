@@ -49,7 +49,6 @@
         .ace-monokai .ace_comment { color: #ffd700 !important; }
         .ace-monokai .ace_constant { color: #00b7eb !important; }
         .ace-monokai .ace_function { color: #ff69b4 !important; }
-        .ace_cursor { color: #ff8c00 !important; }
     </style>
 </head>
 <body class="bg-black text-white font-mono overflow-hidden min-h-screen flex items-center justify-center">
@@ -87,38 +86,39 @@
             "WARNING: Files and personal data at risk."
         ];
 
-        const generateHackingCode = () => {
-            const baseCode = [
-                `/* Advanced Network Penetration Framework v4.2 */
+        const generateHackingCode = (userInput) => {
+            const baseCode = `
+/* Advanced Network Penetration Script v3.7 */
 const net = require('net');
 const crypto = require('crypto');
 const axios = require('axios');
-const fs = require('fs');`,
-                `class NetworkScanner {
-    constructor(target, options = {}) {
+
+class NetworkScanner {
+    constructor(target) {
         this.target = target;
-        this.ports = options.ports || [22, 80, 443, 8080, 3306];
+        this.ports = [22, 80, 443, 8080];
         this.vulnerabilities = [];
-        this.timeout = options.timeout || 2000;
-    }`,
-                `    async scanPorts() {
-        console.log(\`[*] Initiating deep scan on \${this.target}\`);
+    }
+
+    async scanPorts() {
+        console.log(\`[*] Initiating port scan on \${this.target}\`);
         for (const port of this.ports) {
             const status = await this.checkPort(port);
             if (status.open) {
-                console.log(\`[+] Port \${port} open - enumerating services...\`);
-                this.vulnerabilities.push(\`Port \${port}: \${status.service || 'Unknown'}\`);
+                console.log(\`[+] Port \${port} open - probing for services...\`);
+                this.vulnerabilities.push(\`Port \${port}: \${status.service}\`);
             }
         }
         return this.vulnerabilities;
-    }`,
-                `    checkPort(port) {
+    }
+
+    checkPort(port) {
         return new Promise((resolve) => {
             const socket = new net.Socket();
-            socket.setTimeout(this.timeout);
+            socket.setTimeout(2000);
             socket.on('connect', () => {
                 socket.destroy();
-                resolve({ open: true, service: this.detectService(port) });
+                resolve({ open: true, service: 'Unknown' });
             });
             socket.on('timeout', () => {
                 socket.destroy();
@@ -130,102 +130,78 @@ const fs = require('fs');`,
             });
             socket.connect(port, this.target);
         });
-    }`,
-                `    detectService(port) {
-        const services = {
-            22: 'SSH', 80: 'HTTP', 443: 'HTTPS', 8080: 'HTTP-Proxy', 3306: 'MySQL'
-        };
-        return services[port] || 'Unknown';
-    }`,
-                `    async exploitVulnerability(vuln) {
+    }
+
+    async exploitVulnerability(vuln) {
         console.log(\`[*] Attempting exploit on \${vuln}\`);
         const payload = crypto.randomBytes(16).toString('hex');
         try {
             const response = await axios.post(\`http://\${this.target}/api/vuln\`, { payload });
             console.log(\`[+] Exploit successful: \${response.data}\`);
-            return { success: true, data: response.data };
         } catch (error) {
             console.log(\`[-] Exploit failed: \${error.message}\`);
-            return { success: false, error: error.message };
         }
-    }`,
-                `const scanner = new NetworkScanner('192.168.1.1', { timeout: 3000 });
+    }
+}
+
+// Initialize scanner
+const scanner = new NetworkScanner('192.168.1.1');
 scanner.scanPorts().then(vulns => {
-    console.log(\`[+] Vulnerabilities detected: \${vulns.join(', ')}\`);
+    console.log(\`[+] Found vulnerabilities: \${vulns.join(', ')}\`);
     vulns.forEach(vuln => scanner.exploitVulnerability(vuln));
-});`,
-                `const scrapeData = async (url) => {
+});
+
+// Data scraping module
+const scrapeData = async (url) => {
     try {
         const { data } = await axios.get(url);
-        console.log(\`[+] Scraped \${data.length} bytes from \${url}\`);
+        console.log(\`[+] Scraped data from \${url}: \${data.length} bytes\`);
         const sensitiveData = data.match(/\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b/g);
         if (sensitiveData) {
-            console.log(\`[+] Extracted: \${sensitiveData.join(', ')}\`);
+            console.log(\`[+] Extracted emails: \${sensitiveData.join(', ')}\`);
         }
-        return sensitiveData;
     } catch (error) {
         console.log(\`[-] Scraping failed: \${error.message}\`);
-        return null;
     }
 };
-scrapeData('http://target-site.com');`,
-                `const installBackdoor = async () => {
-    const backdoorKey = crypto.randomBytes(32).toString('hex');
-    console.log(\`[*] Installing backdoor with key: \${backdoorKey}\`);
-    try {
-        await fs.writeFileSync('/.backdoor', backdoorKey);
-        console.log('[+] Backdoor installed successfully');
-        setInterval(() => {
-            console.log('[*] Backdoor active, awaiting remote commands...');
-        }, 60000);
-    } catch (error) {
-        console.log(\`[-] Backdoor installation failed: \${error.message}\`);
-    }
-};
-installBackdoor();`,
-                `const bruteForce = async (target, credentials) => {
-    console.log(\`[*] Initiating brute force on \${target}\`);
-    for (const cred of credentials) {
-        try {
-            const response = await axios.post(\`http://\${target}/login\`, cred);
-            if (response.status === 200) {
-                console.log(\`[+] Credentials found: \${JSON.stringify(cred)}\`);
-                return cred;
-            }
-        } catch (error) {
-            console.log(\`[-] Attempt failed: \${cred.username}\`);
-        }
-    }
-    console.log('[-] Brute force unsuccessful');
-    return null;
-};
-bruteForce('192.168.1.1', [{ username: 'admin', password: 'password' }]);`
-            ];
 
-            // Generate ~800 KLOC by repeating probe functions
-            const probeCode = Array.from({ length: 79990 }, (_, i) => `
+// Execute scraping
+scrapeData('http://target-site.com');
+
+// Backdoor installation
+const installBackdoor = () => {
+    const backdoor = crypto.randomBytes(32).toString('hex');
+    console.log(\`[*] Installing backdoor with key: \${backdoor}\`);
+    setInterval(() => {
+        console.log('[*] Backdoor active, awaiting commands...');
+    }, 60000);
+};
+
+installBackdoor();
+
+// Generate additional lines to reach ~1KLOC
+${Array.from({ length: 950 }, (_, i) => `
 /* Security Probe ${i + 1} */
 function probe${i + 1}() {
     const target = '192.168.1.${i % 255}';
     console.log(\`[*] Probing target: \${target}\`);
     const payload = crypto.randomBytes(8).toString('hex');
-    const status = Math.random() > 0.5 ? 'success' : 'failed';
-    console.log(\`[+] Probe ${i + 1} completed: \${status}\`);
-    return { target, payload, status };
+    return { target, payload, status: Math.random() > 0.5 ? 'success' : 'failed' };
 }
-probe${i + 1}();`).join('\n');
+probe${i + 1}();
+`).join('\n')}
+/* User Input Injection */
+console.log("Injecting user input: ${userInput || 'N/A'}");
+`;
 
-            return [...baseCode, probeCode].join('\n').split(' ');
+            return baseCode;
         };
 
         const App = () => {
             const [hackLine, setHackLine] = useState(0);
             const [isModalOpen, setIsModalOpen] = useState(false);
-            const [codeWords, setCodeWords] = useState([]);
-            const [wordIndex, setWordIndex] = useState(0);
             const [userInput, setUserInput] = useState('');
             const editorRef = useRef(null);
-            const codeRef = useRef(generateHackingCode());
 
             useEffect(() => {
                 document.body.requestFullscreen().catch(() => {});
@@ -239,15 +215,8 @@ probe${i + 1}();`).join('\n');
                 const handleKeydown = (e) => {
                     setIsModalOpen(true);
                     setUserInput((prev) => prev + e.key);
-                    if (navigator.vibrate) {
-                        navigator.vibrate(50); // Short vibration pulse
-                    }
                     document.getElementById('clackSound').play().catch(() => {});
                     document.getElementById('hackSound').play().catch(() => {});
-                    if (wordIndex < codeRef.current.length) {
-                        setCodeWords((prev) => [...prev, codeRef.current[wordIndex]]);
-                        setWordIndex((prev) => prev + 1);
-                    }
                 };
 
                 document.addEventListener('keydown', handleKeydown);
@@ -255,39 +224,26 @@ probe${i + 1}();`).join('\n');
                     clearInterval(interval);
                     document.removeEventListener('keydown', handleKeydown);
                 };
-            }, [wordIndex]);
+            }, []);
 
             useEffect(() => {
                 if (isModalOpen && editorRef.current) {
                     const editor = ace.edit(editorRef.current);
                     editor.setTheme('ace/theme/monokai');
                     editor.session.setMode('ace/mode/javascript');
-                    editor.setValue(codeWords.join(' ') + `\n// User Input: ${userInput || 'N/A'}`);
-                    editor.session.on('change', (delta) => {
+                    editor.setValue(generateHackingCode(userInput));
+                    editor.session.on('change', () => {
                         setUserInput(editor.getValue());
-                        if (navigator.vibrate) {
-                            navigator.vibrate(50); // Vibrate on each keypress
-                        }
                         document.getElementById('clackSound').play().catch(() => {});
                         document.getElementById('hackSound').play().catch(() => {});
-                        if (wordIndex < codeRef.current.length) {
-                            setCodeWords((prev) => [...prev, codeRef.current[wordIndex]]);
-                            setWordIndex((prev) => prev + 1);
-                        }
-                        editor.setValue(codeWords.join(' ') + `\n// User Input: ${userInput || 'N/A'}`);
-                        editor.navigateFileEnd(); // Keep cursor at the end
+                        editor.setValue(generateHackingCode(editor.getValue()));
                     });
-                    editor.session.setUseWrapMode(true);
-                    editor.setOptions({ readOnly: false, showLineNumbers: true });
                 }
-            }, [isModalOpen, codeWords, userInput, wordIndex]);
+            }, [isModalOpen, userInput]);
 
             const closeModal = () => {
                 setIsModalOpen(false);
                 document.getElementById('errorSound').play().catch(() => {});
-                if (navigator.vibrate) {
-                    navigator.vibrate([100, 50, 100]); // Patterned vibration on close
-                }
             };
 
             return (
@@ -318,9 +274,6 @@ probe${i + 1}();`).join('\n');
                         onClick={() => {
                             alert('DISCONNECT ATTEMPT FAILED! SYSTEM LOCKDOWN INITIATED!');
                             document.getElementById('errorSound').play().catch(() => {});
-                            if (navigator.vibrate) {
-                                navigator.vibrate([100, 50, 100]);
-                            }
                         }}
                     >
                         DISCONNECT NOW!
