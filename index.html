@@ -8,8 +8,6 @@
     <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.development.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/babel-standalone@6.26.0/babel.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ace-builds@1.4.12/src-min-noconflict/ace.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/ace-builds@1.4.12/src-min-noconflict/mode-javascript.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/ace-builds@1.4.12/src-min-noconflict/theme-monokai.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @keyframes glitch {
@@ -28,10 +26,6 @@
             from { opacity: 0; }
             to { opacity: 1; }
         }
-        @keyframes glow {
-            0%, 100% { box-shadow: 0 0 10px rgba(255, 140, 0, 0.5); }
-            50% { box-shadow: 0 0 20px rgba(255, 140, 0, 0.8); }
-        }
         .glitch { animation: glitch 0.5s infinite alternate; }
         .hack-code { animation: scroll-code 15s linear infinite; }
         .hack-code span { animation: scroll-code 3s linear infinite; }
@@ -41,14 +35,7 @@
             50% { transform: scale(1.1); opacity: 0.8; }
         }
         .modal { animation: fadeIn 0.5s ease-in-out; }
-        .terminal-glow { animation: glow 2s ease-in-out infinite; }
         #codeEditor { height: 100%; width: 100%; }
-        .ace-monokai { background-color: #1a1a1a !important; }
-        .ace-monokai .ace_keyword { color: #ff8c00 !important; }
-        .ace-monokai .ace_string { color: #98fb98 !important; }
-        .ace-monokai .ace_comment { color: #ffd700 !important; }
-        .ace-monokai .ace_constant { color: #00b7eb !important; }
-        .ace-monokai .ace_function { color: #ff69b4 !important; }
     </style>
 </head>
 <body class="bg-black text-white font-mono overflow-hidden min-h-screen flex items-center justify-center">
@@ -64,9 +51,6 @@
     </audio>
     <audio id="errorSound">
         <source src="https://www.soundjay.com/buttons/beep-02.mp3" type="audio/mpeg">
-    </audio>
-    <audio id="hackSound">
-        <source src="https://www.soundjay.com/electronic/computer-beep-01.mp3" type="audio/mpeg">
     </audio>
     <script type="text/babel">
         const { useEffect, useState, useRef } = React;
@@ -86,121 +70,9 @@
             "WARNING: Files and personal data at risk."
         ];
 
-        const generateHackingCode = (userInput) => {
-            const baseCode = `
-/* Advanced Network Penetration Script v3.7 */
-const net = require('net');
-const crypto = require('crypto');
-const axios = require('axios');
-
-class NetworkScanner {
-    constructor(target) {
-        this.target = target;
-        this.ports = [22, 80, 443, 8080];
-        this.vulnerabilities = [];
-    }
-
-    async scanPorts() {
-        console.log(\`[*] Initiating port scan on \${this.target}\`);
-        for (const port of this.ports) {
-            const status = await this.checkPort(port);
-            if (status.open) {
-                console.log(\`[+] Port \${port} open - probing for services...\`);
-                this.vulnerabilities.push(\`Port \${port}: \${status.service}\`);
-            }
-        }
-        return this.vulnerabilities;
-    }
-
-    checkPort(port) {
-        return new Promise((resolve) => {
-            const socket = new net.Socket();
-            socket.setTimeout(2000);
-            socket.on('connect', () => {
-                socket.destroy();
-                resolve({ open: true, service: 'Unknown' });
-            });
-            socket.on('timeout', () => {
-                socket.destroy();
-                resolve({ open: false });
-            });
-            socket.on('error', () => {
-                socket.destroy();
-                resolve({ open: false });
-            });
-            socket.connect(port, this.target);
-        });
-    }
-
-    async exploitVulnerability(vuln) {
-        console.log(\`[*] Attempting exploit on \${vuln}\`);
-        const payload = crypto.randomBytes(16).toString('hex');
-        try {
-            const response = await axios.post(\`http://\${this.target}/api/vuln\`, { payload });
-            console.log(\`[+] Exploit successful: \${response.data}\`);
-        } catch (error) {
-            console.log(\`[-] Exploit failed: \${error.message}\`);
-        }
-    }
-}
-
-// Initialize scanner
-const scanner = new NetworkScanner('192.168.1.1');
-scanner.scanPorts().then(vulns => {
-    console.log(\`[+] Found vulnerabilities: \${vulns.join(', ')}\`);
-    vulns.forEach(vuln => scanner.exploitVulnerability(vuln));
-});
-
-// Data scraping module
-const scrapeData = async (url) => {
-    try {
-        const { data } = await axios.get(url);
-        console.log(\`[+] Scraped data from \${url}: \${data.length} bytes\`);
-        const sensitiveData = data.match(/\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b/g);
-        if (sensitiveData) {
-            console.log(\`[+] Extracted emails: \${sensitiveData.join(', ')}\`);
-        }
-    } catch (error) {
-        console.log(\`[-] Scraping failed: \${error.message}\`);
-    }
-};
-
-// Execute scraping
-scrapeData('http://target-site.com');
-
-// Backdoor installation
-const installBackdoor = () => {
-    const backdoor = crypto.randomBytes(32).toString('hex');
-    console.log(\`[*] Installing backdoor with key: \${backdoor}\`);
-    setInterval(() => {
-        console.log('[*] Backdoor active, awaiting commands...');
-    }, 60000);
-};
-
-installBackdoor();
-
-// Generate additional lines to reach ~1KLOC
-${Array.from({ length: 950 }, (_, i) => `
-/* Security Probe ${i + 1} */
-function probe${i + 1}() {
-    const target = '192.168.1.${i % 255}';
-    console.log(\`[*] Probing target: \${target}\`);
-    const payload = crypto.randomBytes(8).toString('hex');
-    return { target, payload, status: Math.random() > 0.5 ? 'success' : 'failed' };
-}
-probe${i + 1}();
-`).join('\n')}
-/* User Input Injection */
-console.log("Injecting user input: ${userInput || 'N/A'}");
-`;
-
-            return baseCode;
-        };
-
         const App = () => {
             const [hackLine, setHackLine] = useState(0);
             const [isModalOpen, setIsModalOpen] = useState(false);
-            const [userInput, setUserInput] = useState('');
             const editorRef = useRef(null);
 
             useEffect(() => {
@@ -212,11 +84,9 @@ console.log("Injecting user input: ${userInput || 'N/A'}");
                     document.getElementById('typingSound').play().catch(() => {});
                 }, 2000);
 
-                const handleKeydown = (e) => {
+                const handleKeydown = () => {
                     setIsModalOpen(true);
-                    setUserInput((prev) => prev + e.key);
                     document.getElementById('clackSound').play().catch(() => {});
-                    document.getElementById('hackSound').play().catch(() => {});
                 };
 
                 document.addEventListener('keydown', handleKeydown);
@@ -231,15 +101,12 @@ console.log("Injecting user input: ${userInput || 'N/A'}");
                     const editor = ace.edit(editorRef.current);
                     editor.setTheme('ace/theme/monokai');
                     editor.session.setMode('ace/mode/javascript');
-                    editor.setValue(generateHackingCode(userInput));
-                    editor.session.on('change', () => {
-                        setUserInput(editor.getValue());
+                    editor.setValue('// Initiate system override...\nconsole.log("Accessing core systems...");\n// WARNING: Unauthorized access detected');
+                    editor.on('change', () => {
                         document.getElementById('clackSound').play().catch(() => {});
-                        document.getElementById('hackSound').play().catch(() => {});
-                        editor.setValue(generateHackingCode(editor.getValue()));
                     });
                 }
-            }, [isModalOpen, userInput]);
+            }, [isModalOpen]);
 
             const closeModal = () => {
                 setIsModalOpen(false);
@@ -287,9 +154,9 @@ console.log("Injecting user input: ${userInput || 'N/A'}");
                     </div>
                     {isModalOpen && (
                         <div className="modal fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 z-50">
-                            <div className="bg-gray-900 w-full max-w-4xl h-96 md:h-[70vh] rounded-lg shadow-[0_0_20px_rgba(255,140,0,0.5)] terminal-glow">
-                                <div className="flex justify-between items-center p-4 border-b border-orange-500">
-                                    <h2 className="text-orange-500 text-xl font-bold">Hacker Terminal: Core System Override</h2>
+                            <div className="bg-gray-900 w-full max-w-4xl h-96 md:h-[70vh] rounded-lg shadow-[0_0_20px_rgba(0,255,0,0.5)]">
+                                <div className="flex justify-between items-center p-4 border-b border-green-500">
+                                    <h2 className="text-green-500 text-xl font-bold">Hacker Terminal: System Override</h2>
                                     <button
                                         className="text-red-500 hover:text-red-700"
                                         onClick={closeModal}
